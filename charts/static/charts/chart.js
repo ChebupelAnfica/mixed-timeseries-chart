@@ -5,15 +5,30 @@
     return Number(value).toFixed(2);
   }
 
+  function showError(message) {
+    const el = document.getElementById("chart");
+    if (!el) return;
+    el.innerHTML =
+      '<div style="padding:24px;color:#8a1f2d;font:14px/1.4 Segoe UI,sans-serif">' +
+      message +
+      "</div>";
+  }
+
   function mountChart(containerId, options) {
+    if (typeof Highcharts === "undefined") {
+      throw new Error(
+        "Highcharts failed to load. Check network / adblock, then refresh."
+      );
+    }
+
     const meta = (options.tooltip && options.tooltip.mtsMeta) || {};
     const categories = meta.categories || [];
     const tooltipOrder = meta.tooltipOrder || ["area", "bar", "spline", "line"];
     const names = meta.names || {};
     const colors = meta.colors || {};
 
-    const chartOptions = Object.assign({}, options, {
-      tooltip: Object.assign({}, options.tooltip, {
+    const chartOptions = Highcharts.merge(true, options, {
+      tooltip: {
         headerFormat: "",
         formatter: function () {
           const points = this.points || [];
@@ -50,10 +65,9 @@
             "</div>"
           );
         },
-      }),
+      },
     });
 
-    // Highcharts does not need our helper metadata
     if (chartOptions.tooltip) {
       delete chartOptions.tooltip.mtsMeta;
     }
@@ -62,10 +76,18 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    const node = document.getElementById("chart-options");
-    if (!node) return;
-    const options = JSON.parse(node.textContent);
-    mountChart("chart", options);
+    try {
+      const node = document.getElementById("chart-options");
+      if (!node) {
+        showError("Chart options missing from page.");
+        return;
+      }
+      const options = JSON.parse(node.textContent);
+      mountChart("chart", options);
+    } catch (err) {
+      console.error(err);
+      showError(String(err && err.message ? err.message : err));
+    }
   });
 
   window.mountMixedChart = mountChart;
