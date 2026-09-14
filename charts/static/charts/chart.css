@@ -1,7 +1,7 @@
 :root {
   color: #1f1f1f;
   font-family:
-    'Segoe UI',
+    "Segoe UI",
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -10,9 +10,6 @@
     Arial,
     sans-serif;
   line-height: 1.45;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
 }
 
 * {
@@ -23,10 +20,6 @@ body {
   margin: 0;
   min-height: 100vh;
   background: #e5f0fc;
-}
-
-#app {
-  min-height: 100vh;
 }
 
 .page {
@@ -149,7 +142,6 @@ body {
   color: #243041;
 }
 
-/* Shared Highcharts HTML tooltip */
 .mts-tip {
   min-width: 150px;
 }
@@ -182,10 +174,6 @@ body {
 .mts-tip-value {
   font-weight: 700;
   color: #111;
-}
-
-.highcharts-tooltip-box {
-  fill: #ffffff;
 }
 
 @media (max-width: 640px) {

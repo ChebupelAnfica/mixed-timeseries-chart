@@ -1,100 +1,98 @@
-# Mixed time-series chart
+# Mixed time-series chart (Django)
 
-Interactive chart that renders **four** time-series sequences as:
+Тестовое задание: интерактивный график с **четырьмя** time-series последовательностями:
 
-| Key | Type | Style in the demo |
+| Ключ | Тип | Стиль |
 | --- | --- | --- |
-| `area` | Area | Pale yellow filled area (Cost) |
-| `spline` | Spline | Smooth green curve (ROI confirmed) |
-| `line` | Line | Purple polyline with square markers (Conversions) |
-| `bar` | Column bars | Short blue bars along the baseline (CPA) |
+| `area` | Area | Жёлтая заливка (Cost) |
+| `spline` | Spline | Зелёная гладкая кривая (ROI confirmed) |
+| `line` | Line | Фиолетовая линия с квадратными маркерами (Conversions) |
+| `bar` | Column | Короткие синие столбцы (CPA) |
 
-Hover shared tooltip shows the date (`DD.MM.YYYY`) and all four values with color dots — matching the reference GIF behavior.
+Бизнес-логика сборки графика — на **Python**. Django отдаёт страницу и JSON API. Highcharts только рендерит готовый options-объект в браузере.
 
-## Quick start
-
-```bash
-npm install
-npm run dev
-```
-
-Open the local URL printed by Vite (usually `http://localhost:5173`).
-
-Production build:
+## Быстрый старт
 
 ```bash
-npm run build
-npm run preview
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# macOS / Linux
+source .venv/bin/activate
+
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
 ```
 
-## Initialize with four sequences
+Открой [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
 
-```ts
-import { createMixedChart } from './src/chart'
+## Инициализация с четырьмя последовательностями (Python)
 
-const chart = createMixedChart(document.getElementById('chart')!, {
-  dates: [
-    '2026-06-11',
-    '2026-06-12',
-    '2026-06-13',
-  ],
-  series: {
-    area: {
-      name: 'Cost',
-      data: [25.85, 44.36, 55.65],
-    },
-    spline: {
-      name: 'ROI confirmed',
-      data: [180.5, 161.47, 56.33],
-    },
-    line: {
-      name: 'Conversions',
-      data: [30, 36, 70],
-    },
-    bar: {
-      name: 'CPA',
-      data: [0.86, 1.23, 0.79],
-    },
-  },
-})
+```python
+from charts.mixed_chart import create_mixed_chart
 
-// later…
-// chart.destroy()
+options = create_mixed_chart(
+    dates=["2026-06-11", "2026-06-12", "2026-06-13"],
+    area={"name": "Cost", "data": [25.85, 44.36, 55.65]},
+    spline={"name": "ROI confirmed", "data": [180.5, 161.47, 56.33]},
+    line={"name": "Conversions", "data": [30, 36, 70]},
+    bar={"name": "CPA", "data": [0.86, 1.23, 0.79]},
+)
 ```
 
-### Rules
+Правила:
 
-1. `dates.length` must equal every `series.*.data.length`.
-2. Series keys must be exactly: `area`, `spline`, `line`, `bar`.
-3. Optional per-series `color` overrides the defaults.
-4. Optional `height` (px) and `barAxisPadding` (how short the bars stay relative to their values).
+1. Длина каждого `data` = длина `dates`
+2. Ключи серий строго: `area`, `spline`, `line`, `bar`
+3. Опционально: `color` у серии, `height`, `bar_axis_padding`
 
-### Defaults
+## HTTP API
 
-```ts
-import { DEFAULT_COLORS } from './src/chart'
-// {
-//   area:   '#F5E19A',
-//   spline: '#1F800E',
-//   line:   '#B010E8',
-//   bar:    '#3870FE',
-// }
+### Demo options
+
+```bash
+curl http://127.0.0.1:8000/api/chart/
 ```
 
-## Project layout
+### Собрать график из своих данных
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/chart/build/ \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"dates\": [\"2026-06-11\", \"2026-06-12\", \"2026-06-13\"],
+    \"series\": {
+      \"area\":   {\"name\": \"Cost\", \"data\": [25.85, 44.36, 55.65]},
+      \"spline\": {\"name\": \"ROI confirmed\", \"data\": [180.5, 161.47, 56.33]},
+      \"line\":   {\"name\": \"Conversions\", \"data\": [30, 36, 70]},
+      \"bar\":    {\"name\": \"CPA\", \"data\": [0.86, 1.23, 0.79]}
+    }
+  }"
+```
+
+## Структура
 
 ```
-src/
-  chart/
-    createMixedChart.ts   # public API
-    types.ts
-    index.ts
-  demo/
-    sampleData.ts         # GIF-inspired demo dataset
-  main.ts                 # demo page
-  style.css
+charts/
+  mixed_chart.py     # Python API + валидация 4 серий
+  demo_data.py       # демо-данные
+  views.py           # Django views / API
+  templates/charts/  # страница
+  static/charts/     # CSS + тонкий JS-mount
+config/              # settings, urls
+manage.py
+requirements.txt
 ```
 
-## License note
+## Тесты
 
-Demo uses [Highcharts](https://www.highcharts.com/) via npm. Highcharts requires a license for commercial products; free for non-commercial / evaluation use. See their licensing terms before shipping.
+```bash
+python manage.py test charts
+```
+
+## Заметка по Highcharts
+
+Для отрисовки используется Highcharts CDN. Для коммерческого продукта нужна их лицензия; для тестового/некоммерческого демо обычно достаточно evaluation terms.
