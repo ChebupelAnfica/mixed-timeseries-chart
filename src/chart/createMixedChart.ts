@@ -91,14 +91,18 @@ export function createMixedChart(
       {
         title: { text: undefined },
         gridLineWidth: 0,
+        gridLineColor: 'transparent',
         lineWidth: 0,
+        tickLength: 0,
         labels: { enabled: false },
         softMin: 0,
       },
       {
         title: { text: undefined },
         gridLineWidth: 0,
+        gridLineColor: 'transparent',
         lineWidth: 0,
+        tickLength: 0,
         labels: { enabled: false },
         softMin: 0,
         max: barMax,
